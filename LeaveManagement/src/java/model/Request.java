@@ -6,12 +6,9 @@ package model;
 
 import java.sql.Date;
 
-/**
- *
- * @author admin
- */
+
 public class Request {
-    
+    private int rid;
     private int eid;
     private Date created_date;
     private Date from;
@@ -32,6 +29,16 @@ public class Request {
         this.status = status;
         this.reject_reason = reject_reason;
     }
+
+    public int getRid() {
+        return rid;
+    }
+
+    public void setRid(int rid) {
+        this.rid = rid;
+    }
+    
+    
 
     public int getEid() {
         return eid;

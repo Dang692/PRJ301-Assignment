@@ -11,5 +11,8 @@
     <form action="createRequest" method="get">
         <input type="submit" value="Tạo đơn">
     </form>
+    <form action="pendingRequests" method="get">
+        <input type="submit" value="Xem đơn cần duyệt">
+    </form>
 </body>
 </html>
