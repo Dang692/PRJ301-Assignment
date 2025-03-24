@@ -24,6 +24,10 @@
         <servlet-name>OwnRequestsServlet</servlet-name>
         <servlet-class>controller.OwnRequestsServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SuborScheduleServlet</servlet-name>
+        <servlet-class>controller.SuborScheduleServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -47,5 +51,9 @@
     <servlet-mapping>
         <servlet-name>OwnRequestsServlet</servlet-name>
         <url-pattern>/ownRequests</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SuborScheduleServlet</servlet-name>
+        <url-pattern>/suborSchedule</url-pattern>
     </servlet-mapping>
 </web-app>

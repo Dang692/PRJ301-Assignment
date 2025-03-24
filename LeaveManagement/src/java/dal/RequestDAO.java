@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 import model.Request;
 
@@ -107,4 +108,42 @@ public class RequestDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    
+    public List<Request> getSubordinateRequestsByDateRange(int managerId, Date fromDate, Date toDate) {
+    List<Request> requests = new ArrayList<>();
+    String sql = "SELECT r.*, e.name FROM Request r "
+               + "JOIN Employee e ON r.employee_id = e.employee_id "
+               + "WHERE e.manager_id = ? "
+               + "AND (\n" +
+"    (r.from_date BETWEEN ? AND ?) OR\n" +
+"    (r.to_date BETWEEN ? AND ?) OR\n" +
+"    (? BETWEEN r.from_date AND r.to_date) OR\n" +
+"    (? BETWEEN r.from_date AND r.to_date)\n" +
+")";
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        st.setInt(1, managerId);
+        st.setDate(2, toDate);
+        st.setDate(3, fromDate);
+        ResultSet rs = st.executeQuery();
+         List<Integer> subordinates = new ArrayList<>();
+        while (rs.next()) {
+            subordinates.add(rs.getInt("employee_id"));
+            Request req = new Request();
+            req.setRid(rs.getInt("request_id"));
+            req.setEid(rs.getInt("employee_id"));
+            req.setCreated_date(rs.getDate("created_date"));
+            req.setFrom(rs.getDate("from_date"));
+            req.setTo(rs.getDate("to_date"));
+            req.setReason(rs.getString("reason"));
+            req.setStatus(rs.getInt("status"));
+            req.setReject_reason(rs.getString("reject_reason"));
+            
+            requests.add(req);
+        } System.out.println("Danh sách cấp dưới: " + subordinates);
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return requests;
+}
+
 }

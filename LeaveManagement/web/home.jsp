@@ -17,5 +17,8 @@
     <form action="ownRequests" method="get">
         <input type="submit" value="Xem đơn mình gửi">
     </form>
+    <button onclick="window.location.href='suborSchedule.jsp'">
+            Xem lịch nghỉ cấp dưới
+    </button>
 </body>
 </html>

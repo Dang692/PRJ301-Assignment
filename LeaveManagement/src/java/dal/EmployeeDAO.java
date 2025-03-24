@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import model.Employee;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -63,6 +64,39 @@ public class EmployeeDAO extends DBContext {
 
         return employeeNames;
     }
+    
+    public String getEmployeeNameById(int eid) {
+    String name = null;
+    String sql = "SELECT employee_name FROM Employee WHERE employee_id = ?";
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        st.setInt(1, eid);
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            name = rs.getString("employee_name");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return name;
+    }
+    
+    // Thêm hàm lấy tất cả cấp dưới của một manager
+public List<Integer> getAllSubordinates(int managerId) {
+    List<Integer> subordinates = new ArrayList<>();
+    String sql = "SELECT employee_id FROM Employee WHERE manager_id = ?";
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        st.setInt(1, managerId);
+        ResultSet rs = st.executeQuery();
+        while (rs.next()) {
+            subordinates.add(rs.getInt("employee_id"));
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return subordinates;
+}
+
+
 }
 
     
