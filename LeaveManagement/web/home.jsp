@@ -14,5 +14,8 @@
     <form action="pendingRequests" method="get">
         <input type="submit" value="Xem đơn cần duyệt">
     </form>
+    <form action="ownRequests" method="get">
+        <input type="submit" value="Xem đơn mình gửi">
+    </form>
 </body>
 </html>

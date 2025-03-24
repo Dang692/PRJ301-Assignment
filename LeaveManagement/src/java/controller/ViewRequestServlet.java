@@ -19,10 +19,6 @@ public class ViewRequestServlet extends HttpServlet {
             String employeeName = request.getParameter("name");
             RequestDAO reqDao = new RequestDAO();
             Request req = reqDao.getRequestById(rid);
-
-            
-            
-
             request.setAttribute("request", req);
             request.setAttribute("name", employeeName);
 

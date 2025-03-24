@@ -23,31 +23,55 @@ public class RequestDAO extends DBContext {
     }
 
     public List<Request> getPendingRequestsByManagerId(int managerId) {
-    List<Request> requests = new ArrayList<>();
-    String sql = "SELECT r.* FROM Request r "
-               + "JOIN Employee e ON r.employee_id = e.employee_id "
-               + "WHERE e.manager_id = ?";
-    try (PreparedStatement st = connection.prepareStatement(sql)) {
-        st.setInt(1, managerId);
-        ResultSet rs = st.executeQuery();
-        while (rs.next()) {
-            Request req = new Request();
-            req.setRid(rs.getInt("request_id"));
-            req.setEid(rs.getInt("employee_id"));
-            req.setCreated_date(rs.getDate("created_date"));
-            req.setFrom(rs.getDate("from_date"));
-            req.setTo(rs.getDate("to_date"));
-            req.setReason(rs.getString("reason"));
-            req.setStatus(rs.getInt("status"));
-            req.setReject_reason(rs.getString("reject_reason"));
-            requests.add(req);
+        List<Request> requests = new ArrayList<>();
+        String sql = "SELECT r.* FROM Request r "
+                + "JOIN Employee e ON r.employee_id = e.employee_id "
+                + "WHERE e.manager_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, managerId);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Request req = new Request();
+                req.setRid(rs.getInt("request_id"));
+                req.setEid(rs.getInt("employee_id"));
+                req.setCreated_date(rs.getDate("created_date"));
+                req.setFrom(rs.getDate("from_date"));
+                req.setTo(rs.getDate("to_date"));
+                req.setReason(rs.getString("reason"));
+                req.setStatus(rs.getInt("status"));
+                req.setReject_reason(rs.getString("reject_reason"));
+                requests.add(req);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return requests;
     }
-    return requests;
-}
-
+    
+    public List<Request> getOwnPendingRequests(int eid) {
+        List<Request> requests = new ArrayList<>();
+        String sql = "SELECT r.* FROM Request r "
+                + "WHERE r.employee_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, eid);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Request req = new Request();
+                req.setRid(rs.getInt("request_id"));
+                req.setEid(rs.getInt("employee_id"));
+                req.setCreated_date(rs.getDate("created_date"));
+                req.setFrom(rs.getDate("from_date"));
+                req.setTo(rs.getDate("to_date"));
+                req.setReason(rs.getString("reason"));
+                req.setStatus(rs.getInt("status"));
+                req.setReject_reason(rs.getString("reject_reason"));
+                requests.add(req);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
 
     public Request getRequestById(int requestId) {
         String sql = "SELECT * FROM Request WHERE request_id = ?";
