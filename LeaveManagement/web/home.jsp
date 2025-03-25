@@ -19,6 +19,7 @@
         ArrayList<Employee> hierachy = new EmployeeDAO().getAllSubor(eid);
         ArrayList<Employee> directSubor = new ArrayList<Employee>();
         ArrayList<Employee> otherSubor = new ArrayList<Employee>();
+        String managerName = new EmployeeDAO().getManagerName(eid);
         for (Employee subor : hierachy){
             if(subor.getLevel() == 1){
                 directSubor.add(subor);
@@ -27,7 +28,9 @@
             }
         }
         
-    %>   
+    %> 
+    
+    <h2>Cấp trên trực tiếp: <%= managerName %> </h2>
     
     <h2> Các cấp dưới trực tiếp:   </h2>
     

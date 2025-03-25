@@ -82,6 +82,25 @@ public class EmployeeDAO extends DBContext {
     return name;
     }
     
+    public String getManagerName(int employeeId){
+        String name = "";
+        String sql = "SELECT e2.employee_name " +
+                 "FROM Employee e1 " +
+                 "JOIN Employee e2 ON e1.manager_id = e2.employee_id " +
+                 "WHERE e1.employee_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+        st.setInt(1, employeeId);
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            name = rs.getString("employee_name");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return name;
+    }
+    
+    
     // Thêm hàm lấy tất cả cấp dưới của một manager
 public List<Integer> getAllSubordinates(int managerId) {
     List<Integer> subordinates = new ArrayList<>();
@@ -156,7 +175,7 @@ public List<Employee> getSubordinatesByManagerId(int managerId) {
         return employees;
     }
 
-
+    
 
 }
 
