@@ -8,6 +8,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class EmployeeDAO extends DBContext {
 
@@ -95,6 +97,65 @@ public List<Integer> getAllSubordinates(int managerId) {
     }
     return subordinates;
 }
+
+public List<Employee> getSubordinatesByManagerId(int managerId) {
+    List<Employee> subordinates = new ArrayList<>();
+    String sql = "SELECT * FROM Employee WHERE manager_id = ?";
+    try (PreparedStatement st = connection.prepareStatement(sql)) {
+        st.setInt(1, managerId);
+        ResultSet rs = st.executeQuery();
+        while (rs.next()) {
+            Employee emp = new Employee(); 
+            emp.setEid(rs.getInt("employee_id"));
+            emp.setEname(rs.getString("employee_name"));
+            subordinates.add(emp);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return subordinates;
+}
+
+    public ArrayList<Employee> getAllSubor(int managerId) {
+        ArrayList<Employee> employees = new ArrayList<>();
+        try {
+            String sql = "WITH EmployeeHierarchy AS(\n"
+                    + "	SELECT \n"
+                    + "	employee_id,\n"
+                    + "	employee_name,\n"
+                    + "	manager_id,\n"
+                    + "	0 as [Level]\n"
+                    + "	FROM Employee\n"
+                    + "	WHERE employee_id = ?\n"
+                    + "\n"
+                    + "	UNION ALL\n"
+                    + "\n"
+                    + "	SELECT e.employee_id,e.employee_name,e.manager_id, m.[Level] + 1 as [Level]  \n"
+                    + "	FROM Employee e\n"
+                    + "	INNER JOIN EmployeeHierarchy m ON m.employee_id = e.manager_id\n"
+                    + ")\n"
+                    + "SELECT * FROM \n"
+                    + "	EmployeeHierarchy   \n";
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, managerId);
+            ResultSet rs = stm.executeQuery();
+            
+            while(rs.next())
+            {
+                    Employee e = new Employee();
+                    e.setEid(rs.getInt("employee_id"));
+                    e.setEname(rs.getString("employee_name"));
+                    e.setManager_id(rs.getInt("manager_id")); 
+                    e.setLevel(rs.getInt("Level"));
+                    employees.add(e);
+            }
+            
+        } catch (SQLException e) {
+        e.printStackTrace();
+    }
+        return employees;
+    }
+
 
 
 }

@@ -110,40 +110,39 @@ public class RequestDAO extends DBContext {
     }
     
     public List<Request> getSubordinateRequestsByDateRange(int managerId, Date fromDate, Date toDate) {
-    List<Request> requests = new ArrayList<>();
-    String sql = "SELECT r.*, e.name FROM Request r "
-               + "JOIN Employee e ON r.employee_id = e.employee_id "
-               + "WHERE e.manager_id = ? "
-               + "AND (\n" +
-"    (r.from_date BETWEEN ? AND ?) OR\n" +
-"    (r.to_date BETWEEN ? AND ?) OR\n" +
-"    (? BETWEEN r.from_date AND r.to_date) OR\n" +
-"    (? BETWEEN r.from_date AND r.to_date)\n" +
-")";
+    List<Request> subRequests = new ArrayList<>();
+    String sql = "SELECT r.*, e.employee_name FROM Request r "
+           + "JOIN Employee e ON r.employee_id = e.employee_id "
+           + "WHERE e.manager_id = ? "
+            + "AND r.status = 1 "
+           + "AND ("
+           + "    (r.from_date BETWEEN ? AND ?) "
+           + "    OR (r.to_date BETWEEN ? AND ?) "
+           + "    OR (r.from_date <= ? AND r.to_date >= ?)"
+           + ")";
+
     try (PreparedStatement st = connection.prepareStatement(sql)) {
         st.setInt(1, managerId);
-        st.setDate(2, toDate);
-        st.setDate(3, fromDate);
+        st.setDate(2, fromDate);
+        st.setDate(3, toDate);
+        st.setDate(4, fromDate);
+        st.setDate(5, toDate);
+        st.setDate(6, fromDate);
+        st.setDate(7, toDate);
         ResultSet rs = st.executeQuery();
-         List<Integer> subordinates = new ArrayList<>();
-        while (rs.next()) {
-            subordinates.add(rs.getInt("employee_id"));
-            Request req = new Request();
-            req.setRid(rs.getInt("request_id"));
-            req.setEid(rs.getInt("employee_id"));
-            req.setCreated_date(rs.getDate("created_date"));
+        
+        while (rs.next()) {            
+            Request req = new Request();            
+            req.setEid(rs.getInt("employee_id"));            
             req.setFrom(rs.getDate("from_date"));
             req.setTo(rs.getDate("to_date"));
-            req.setReason(rs.getString("reason"));
-            req.setStatus(rs.getInt("status"));
-            req.setReject_reason(rs.getString("reject_reason"));
-            
-            requests.add(req);
-        } System.out.println("Danh sách cấp dưới: " + subordinates);
+            req.setEname("employee_name");
+            subRequests.add(req);
+        } 
     } catch (SQLException e) {
         e.printStackTrace();
     }
-    return requests;
+    return subRequests;
 }
 
 }

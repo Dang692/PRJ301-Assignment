@@ -14,6 +14,7 @@ public class Account {
     private String username;
     private String password;
     private int eid;
+    
 
     public Account() {
     }
@@ -23,6 +24,10 @@ public class Account {
         this.password = password;
         this.eid = eid;
     }
+
+    
+    
+    
 
     public String getUsername() {
         return username;

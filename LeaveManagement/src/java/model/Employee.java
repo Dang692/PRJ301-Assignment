@@ -8,6 +8,7 @@ public class Employee {
     private String dept;
     private String role;
     private Integer manager_id; // Nullable nếu là Boss
+    private int level;
 
     public Employee() {
     }
@@ -19,6 +20,16 @@ public class Employee {
         this.role = role;
         this.manager_id = manager_id;
     }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+    
+    
 
     public int getEid() {
         return eid;

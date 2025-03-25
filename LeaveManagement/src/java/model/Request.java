@@ -16,7 +16,7 @@ public class Request {
     private String reason;
     private int status; // 0 - Pending, 1 - Approved, 2 - Rejected    
     private String reject_reason;
-
+    private String ename;
     public Request() {
     }
 
@@ -36,6 +36,14 @@ public class Request {
 
     public void setRid(int rid) {
         this.rid = rid;
+    }
+
+    public String getEname() {
+        return ename;
+    }
+
+    public void setEname(String ename) {
+        this.ename = ename;
     }
     
     

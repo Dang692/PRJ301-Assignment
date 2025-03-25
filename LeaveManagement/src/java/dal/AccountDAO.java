@@ -19,4 +19,23 @@ public class AccountDAO extends DBContext {
         }
         return null;
     }
+    
+    public String getRole(String username){
+        String sql = "SELECT e.role_name  "
+                + "FROM Account a "
+                + "JOIN Employee e ON a.employee_id = e.employee_id "
+                + "WHERE a.username = ?";
+        try {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setString(1, username);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getString("role_name");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; 
+                
+    }
 }

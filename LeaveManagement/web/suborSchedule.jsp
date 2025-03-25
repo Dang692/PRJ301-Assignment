@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.*" %>
 <%@page import="java.sql.Date" %>
+<%@ page import="model.Employee" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,17 +18,18 @@
     </form>
 
     <%
-        Map<String, Map<Date, String>> schedule = (Map<String, Map<Date, String>>) request.getAttribute("schedule");
+        Map<Integer, Map<Date, String>> schedule = (Map<Integer, Map<Date, String>>) request.getAttribute("schedule");
         Date fromDate = (Date) request.getAttribute("fromDate");
         Date toDate = (Date) request.getAttribute("toDate");
-
+        List<Employee> subordinates = (List<Employee>)request.getAttribute("subordinates"); 
         if (schedule != null && fromDate != null && toDate != null) {
             Calendar cal = Calendar.getInstance();
     %>
 
     <table border="1" cellpadding="5" cellspacing="0">
         <tr>
-            <th>Nhân viên</th>
+            <th>Id nhân viên</th>
+            <th>Tên nhân viên</th>
             <%
                 cal.setTime(fromDate);
                 while (!cal.getTime().after(toDate)) {
@@ -39,17 +41,20 @@
             %>
         </tr>
         <%
-            for (Map.Entry<String, Map<Date, String>> entry : schedule.entrySet()) {
-                String empName = entry.getKey();
-                Map<Date, String> empSchedule = entry.getValue();
+            for (Employee sub : subordinates){
+                int subId = sub.getEid();
+                String subName = sub.getEname();
+                Map<Date, String> currentSchedule = schedule.get(subId);
         %>
+        
         <tr>
-            <td><%= empName %></td>
+            <td><%= subId %></td>
+            <td><%= subName %></td>
             <%
                 cal.setTime(fromDate);
                 while (!cal.getTime().after(toDate)) {
                     Date currentDate = new Date(cal.getTimeInMillis());
-                    String status = empSchedule.getOrDefault(currentDate, "làm");
+                    String status = currentSchedule.get(currentDate);
             %>
             <td><%= status %></td>
             <%

@@ -11,63 +11,80 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
+import model.Employee;
 import model.Request;
 
 public class SuborScheduleServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("account");
+        throws ServletException, IOException {
+    Account account = (Account) request.getSession().getAttribute("account");
+    if (account == null) {
+        response.sendRedirect("login");
+        return;
+    }
 
-        if (account == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-
-        // Lấy khoảng thời gian từ request
+    try {
         Date fromDate = Date.valueOf(request.getParameter("fromDate"));
         Date toDate = Date.valueOf(request.getParameter("toDate"));
 
+        // Lấy danh sách các cấp dưới của người dùng
+        EmployeeDAO employeeDAO = new EmployeeDAO();
+        List<Employee> subordinates = employeeDAO.getSubordinatesByManagerId(account.getEid());
         RequestDAO requestDAO = new RequestDAO();
-        EmployeeDAO dao = new EmployeeDAO();
-
-        // Lấy tất cả các cấp dưới của user hiện tại
-        List<Integer> subordinates = dao.getAllSubordinates(account.getEid());
         List<Request> requests = requestDAO.getSubordinateRequestsByDateRange(account.getEid(), fromDate, toDate);
+        Map<Integer, Map<Date, String>> schedule = new LinkedHashMap<>();
+        
+        
 
-        // Tạo map lưu trữ trạng thái làm/nghỉ của từng nhân viên theo từng ngày
-        Map<String, Map<Date, String>> schedule = new LinkedHashMap<>();
-        Calendar cal = Calendar.getInstance();
-
-        // Khởi tạo dữ liệu mặc định "làm" cho tất cả các cấp dưới trong khoảng thời gian
-        for (int subId : subordinates) {
-            String empName = dao.getEmployeeNameById(subId);
-            schedule.putIfAbsent(empName, new LinkedHashMap<>());
-
+        // Tạo schedule chứa tất cả các cấp dưới
+        
+        for (Employee subordinate : subordinates) {
+            Map<Date, String> empSchedule = new LinkedHashMap<>();
+            Calendar cal = Calendar.getInstance();
             cal.setTime(fromDate);
             while (!cal.getTime().after(toDate)) {
-                schedule.get(empName).put(new Date(cal.getTimeInMillis()), "làm");
+                empSchedule.put(new Date(cal.getTimeInMillis()), "làm"); // mặc định là làm việc
                 cal.add(Calendar.DATE, 1);
             }
+            schedule.put(subordinate.getEid(), empSchedule);
         }
 
-        // Cập nhật trạng thái "nghỉ" dựa trên các yêu cầu nghỉ phép trong khoảng thời gian
-        for (Request req : requests) {
-            String empName = dao.getEmployeeNameById(req.getEid());
-            cal.setTime(req.getFrom());
-            while (!cal.getTime().after(req.getTo())) {
-                if (!cal.getTime().before(fromDate) && !cal.getTime().after(toDate)) {
-                    schedule.get(empName).put(new Date(cal.getTimeInMillis()), "nghỉ");
+        
+        
+
+        // Cập nhật trạng thái nghỉ dựa trên các yêu cầu nghỉ phép
+        for (Employee subordinate : subordinates) {
+            for (Request req : requests) {
+                if (req.getEid() == subordinate.getEid()) { // kiểm tra request của cấp dưới đang xét
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(fromDate);
+
+                    while (!cal.getTime().after(toDate)) {
+                        Date currentDate = new Date(cal.getTimeInMillis());
+                        if (!currentDate.before(req.getFrom()) && !currentDate.after(req.getTo())) {
+                            Map<Date, String> currentDateSchedule = schedule.get(subordinate.getEid());
+                            currentDateSchedule.put(currentDate, "nghỉ");
+                            schedule.put(subordinate.getEid(), currentDateSchedule);
+                        }
+                        cal.add(Calendar.DATE, 1);
+                    }
                 }
-                cal.add(Calendar.DATE, 1);
             }
         }
 
+        // Đặt schedule lên request để truyền sang JSP
         request.setAttribute("schedule", schedule);
         request.setAttribute("fromDate", fromDate);
         request.setAttribute("toDate", toDate);
+        request.setAttribute("subordinates", subordinates);
 
         request.getRequestDispatcher("suborSchedule.jsp").forward(request, response);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.sendRedirect("error.jsp");
     }
+}
+
 }
